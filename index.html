@@ -1,0 +1,2422 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>FB Studio - 京大サッカー部</title>
+<style>
+/* ========== CSS Reset & Base ========== */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --primary: #1a56db;
+    --primary-dark: #1444b0;
+    --primary-light: #e1eaff;
+    --bg: #f3f4f6;
+    --bg-white: #ffffff;
+    --text-primary: #111827;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
+    --border: #e5e7eb;
+    --success: #059669;
+    --success-light: #d1fae5;
+    --success-bg: #ecfdf5;
+    --danger: #dc2626;
+    --danger-light: #fee2e2;
+    --danger-bg: #fef2f2;
+    --warning: #d97706;
+    --warning-light: #fef3c7;
+    --warning-bg: #fffbeb;
+    --info-bg: #eff6ff;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-full: 9999px;
+    --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+button {
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-size: inherit;
+    -webkit-tap-highlight-color: transparent;
+}
+
+input, textarea {
+    font-family: inherit;
+    font-size: inherit;
+}
+
+/* ========== App Container ========== */
+#app {
+    max-width: 960px;
+    margin: 0 auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    position: relative;
+    background: var(--bg);
+}
+
+/* ========== Screen Management ========== */
+.screen {
+    display: none;
+    opacity: 0;
+    transform: translateX(20px);
+    transition: opacity var(--transition), transform var(--transition);
+    padding-bottom: calc(80px + var(--safe-bottom));
+}
+
+.screen.active {
+    display: block;
+}
+
+.screen.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.screen.slide-left {
+    transform: translateX(-20px);
+}
+
+/* ========== Header ========== */
+.header {
+    background: var(--primary);
+    color: white;
+    padding: calc(var(--safe-top) + 12px) 16px 14px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-md);
+}
+
+.header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.header-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.header-coach {
+    font-size: 0.8rem;
+    opacity: 0.9;
+    background: rgba(255,255,255,0.15);
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+}
+
+.header-back {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 8px 4px;
+    min-height: 44px;
+    min-width: 44px;
+}
+
+.header-back svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.header-player-info {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-player-number {
+    background: rgba(255,255,255,0.2);
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.header-player-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.header-player-position {
+    font-size: 0.8rem;
+    opacity: 0.85;
+}
+
+/* ========== Bottom Navigation ========== */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 960px;
+    background: var(--bg-white);
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding-bottom: var(--safe-bottom);
+    z-index: 100;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+}
+
+.bottom-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 0;
+    min-height: 56px;
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    font-weight: 500;
+    transition: color var(--transition);
+}
+
+.bottom-nav-item.active {
+    color: var(--primary);
+}
+
+.bottom-nav-item svg {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 2px;
+}
+
+/* ========== Position Tabs ========== */
+.position-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 12px 16px;
+    background: var(--bg-white);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.position-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.position-tab {
+    flex-shrink: 0;
+    padding: 7px 18px;
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: var(--bg);
+    border: 1.5px solid transparent;
+    transition: all var(--transition);
+    min-height: 36px;
+}
+
+.position-tab.active {
+    background: var(--primary);
+    color: white;
+}
+
+.position-tab:not(.active):active {
+    background: var(--border);
+}
+
+/* ========== Player Grid ========== */
+.player-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 12px 16px;
+}
+
+.player-card {
+    background: var(--bg-white);
+    border-radius: var(--radius-md);
+    padding: 16px 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: var(--shadow-sm);
+    border: 1.5px solid var(--border);
+    transition: all var(--transition);
+    min-height: 64px;
+    cursor: pointer;
+}
+
+.player-card:active {
+    transform: scale(0.97);
+    border-color: var(--primary);
+    box-shadow: var(--shadow-md);
+}
+
+.player-number {
+    background: var(--primary-light);
+    color: var(--primary);
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.player-name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.player-pos-badge {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* ========== Skeleton Loading ========== */
+.skeleton {
+    background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite ease-in-out;
+    border-radius: var(--radius-sm);
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.skeleton-card {
+    height: 64px;
+    border-radius: var(--radius-md);
+}
+
+.skeleton-tab {
+    width: 60px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
+}
+
+/* ========== Coach Modal ========== */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition);
+    padding: 20px;
+}
+
+.modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal {
+    background: var(--bg-white);
+    border-radius: var(--radius-lg);
+    padding: 28px 24px;
+    width: 100%;
+    max-width: 360px;
+    transform: scale(0.9) translateY(20px);
+    transition: transform var(--transition);
+    box-shadow: var(--shadow-lg);
+}
+
+.modal-overlay.show .modal {
+    transform: scale(1) translateY(0);
+}
+
+.modal-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 6px;
+}
+
+.modal-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.coach-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.coach-item {
+    padding: 14px 16px;
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-align: center;
+    transition: all var(--transition);
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid transparent;
+}
+
+.coach-item:active {
+    background: var(--primary-light);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+/* ========== Recording Screen ========== */
+.recording-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+    gap: 20px;
+}
+
+.mic-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mic-btn {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-lg);
+    transition: all var(--transition);
+    position: relative;
+    z-index: 2;
+}
+
+.mic-btn svg {
+    width: 32px;
+    height: 32px;
+}
+
+.mic-btn.recording {
+    background: var(--danger);
+}
+
+.mic-pulse {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--danger);
+    opacity: 0;
+    z-index: 1;
+}
+
+.mic-btn.recording ~ .mic-pulse {
+    animation: pulse-ring 1.5s ease-out infinite;
+}
+
+@keyframes pulse-ring {
+    0% { transform: scale(1); opacity: 0.4; }
+    100% { transform: scale(1.8); opacity: 0; }
+}
+
+.mic-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.recording-timer {
+    font-size: 1.8rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary);
+    letter-spacing: 0.05em;
+}
+
+.recording-timer.active {
+    color: var(--danger);
+}
+
+.transcript-area {
+    width: 100%;
+    padding: 0 16px;
+}
+
+.transcript-box {
+    background: var(--bg-white);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    min-height: 150px;
+    max-height: 250px;
+    overflow-y: auto;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.transcript-interim {
+    color: var(--text-muted);
+}
+
+.transcript-final {
+    color: var(--text-primary);
+}
+
+.transcript-placeholder {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.manual-textarea {
+    width: 100%;
+    min-height: 150px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    resize: vertical;
+    outline: none;
+    transition: border-color var(--transition);
+}
+
+.manual-textarea:focus {
+    border-color: var(--primary);
+}
+
+.recording-actions {
+    display: flex;
+    gap: 10px;
+    padding: 16px;
+    width: 100%;
+}
+
+/* ========== Buttons ========== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all var(--transition);
+    min-height: 48px;
+    white-space: nowrap;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:active {
+    background: var(--primary-dark);
+    transform: scale(0.98);
+}
+
+.btn-primary:disabled {
+    background: #93a5cf;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-secondary {
+    background: var(--bg);
+    color: var(--text-secondary);
+    border: 1.5px solid var(--border);
+}
+
+.btn-secondary:active {
+    background: var(--border);
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.btn-danger:active {
+    background: #b91c1c;
+}
+
+.btn-success {
+    background: var(--success);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-success:active {
+    background: #047857;
+    transform: scale(0.98);
+}
+
+.btn-full {
+    width: 100%;
+}
+
+.btn-flex {
+    flex: 1;
+}
+
+/* ========== Preview Screen ========== */
+.preview-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.preview-card {
+    border-radius: var(--radius-md);
+    padding: 16px;
+    box-shadow: var(--shadow-sm);
+}
+
+.preview-card-positive {
+    background: var(--success-bg);
+    border: 1.5px solid #a7f3d0;
+}
+
+.preview-card-improvement {
+    background: var(--warning-bg);
+    border: 1.5px solid #fde68a;
+}
+
+.preview-card-action {
+    background: var(--info-bg);
+    border: 1.5px solid #bfdbfe;
+}
+
+.preview-card-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.preview-card-positive .preview-card-label {
+    color: var(--success);
+}
+
+.preview-card-improvement .preview-card-label {
+    color: var(--warning);
+}
+
+.preview-card-action .preview-card-label {
+    color: var(--primary);
+}
+
+.preview-card-text {
+    font-size: 0.9rem;
+    line-height: 1.7;
+    min-height: 2.5em;
+    outline: none;
+    white-space: pre-wrap;
+    word-break: break-word;
+    padding: 8px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.6);
+    border: 1.5px solid transparent;
+    transition: border-color var(--transition), background var(--transition);
+    cursor: text;
+}
+
+.preview-card-text:focus {
+    border-color: var(--primary);
+    background: white;
+}
+
+.preview-card-text:empty::before {
+    content: attr(data-placeholder);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.raw-text-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: var(--bg-white);
+    border-radius: var(--radius-md);
+    border: 1.5px solid var(--border);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.raw-text-toggle svg {
+    width: 18px;
+    height: 18px;
+    transition: transform var(--transition);
+}
+
+.raw-text-toggle.open svg {
+    transform: rotate(180deg);
+}
+
+.raw-text-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+}
+
+.raw-text-content.open {
+    max-height: 400px;
+}
+
+.raw-text-inner {
+    padding: 12px 16px;
+    background: var(--bg-white);
+    border: 1.5px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    max-height: 200px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.preview-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 16px 16px;
+}
+
+.preview-actions-row {
+    display: flex;
+    gap: 10px;
+}
+
+/* ========== Loading Spinner ========== */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    gap: 16px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-text {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* ========== Completion Screen ========== */
+.completion-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 24px;
+    gap: 20px;
+    text-align: center;
+}
+
+.checkmark-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--success);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes pop-in {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.checkmark-circle svg {
+    width: 40px;
+    height: 40px;
+    color: white;
+    stroke-dasharray: 50;
+    stroke-dashoffset: 50;
+    animation: draw-check 0.5s 0.3s forwards ease;
+}
+
+@keyframes draw-check {
+    to { stroke-dashoffset: 0; }
+}
+
+.completion-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.completion-subtitle {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* ========== History Screen ========== */
+.history-filters {
+    padding: 12px 16px;
+    display: flex;
+    gap: 8px;
+    background: var(--bg-white);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.history-filters::-webkit-scrollbar {
+    display: none;
+}
+
+.filter-input {
+    flex-shrink: 0;
+    padding: 7px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    background: var(--bg);
+    outline: none;
+    transition: border-color var(--transition);
+    min-height: 36px;
+    width: 120px;
+}
+
+.filter-input:focus {
+    border-color: var(--primary);
+}
+
+.filter-input[type="date"] {
+    width: 140px;
+}
+
+.history-list {
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.history-card {
+    background: var(--bg-white);
+    border-radius: var(--radius-md);
+    border: 1.5px solid var(--border);
+    overflow: hidden;
+    transition: box-shadow var(--transition);
+    box-shadow: var(--shadow-sm);
+}
+
+.history-card-header {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    min-height: 60px;
+}
+
+.history-card-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.history-card-player {
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.history-card-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.history-card-arrow {
+    width: 20px;
+    height: 20px;
+    color: var(--text-muted);
+    transition: transform var(--transition);
+    flex-shrink: 0;
+}
+
+.history-card.open .history-card-arrow {
+    transform: rotate(180deg);
+}
+
+.history-card-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+}
+
+.history-card.open .history-card-body {
+    max-height: 600px;
+}
+
+.history-card-section {
+    padding: 10px 16px;
+    border-top: 1px solid var(--border);
+}
+
+.history-card-section-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.history-card-section-text {
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+}
+
+.history-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.history-section-positive .history-card-section-label { color: var(--success); }
+.history-section-improvement .history-card-section-label { color: var(--warning); }
+.history-section-action .history-card-section-label { color: var(--primary); }
+
+/* ========== Toast ========== */
+.toast-container {
+    position: fixed;
+    top: calc(var(--safe-top) + 16px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2000;
+    width: 90%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+}
+
+.toast {
+    background: var(--text-primary);
+    color: white;
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 500;
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-20px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    line-height: 1.4;
+}
+
+.toast.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.toast.toast-error {
+    background: var(--danger);
+}
+
+.toast.toast-success {
+    background: var(--success);
+}
+
+.toast.toast-warning {
+    background: var(--warning);
+}
+
+.toast-action {
+    flex-shrink: 0;
+    padding: 4px 10px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: auto;
+}
+
+/* ========== Utility ========== */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+}
+
+.text-center { text-align: center; }
+.mt-2 { margin-top: 8px; }
+.mt-4 { margin-top: 16px; }
+.mb-2 { margin-bottom: 8px; }
+
+/* ========== Scrollbar ========== */
+::-webkit-scrollbar {
+    width: 4px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+}
+
+/* ========== Manual input toggle ========== */
+.input-mode-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 16px;
+    font-size: 0.8rem;
+    color: var(--primary);
+    font-weight: 600;
+    min-height: 44px;
+}
+
+/* ========== Responsive ========== */
+@media (min-width: 641px) {
+    #app {
+        border-left: 1px solid var(--border);
+        border-right: 1px solid var(--border);
+    }
+    .player-grid {
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
+        padding: 16px 24px;
+    }
+    .preview-content {
+        padding: 24px;
+    }
+    .recording-area {
+        padding: 32px 24px;
+    }
+    .header {
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+}
+
+@media (min-width: 961px) {
+    .player-grid {
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+    }
+}
+
+@media (max-width: 360px) {
+    .player-grid {
+        gap: 8px;
+        padding: 10px 12px;
+    }
+    .player-card {
+        padding: 12px 10px;
+    }
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+    <!-- SCR-001: Home -->
+    <div id="screen-home" class="screen active visible">
+        <div class="header">
+            <div class="header-top">
+                <div class="header-title">FB Studio</div>
+                <div class="header-coach" id="header-coach-name"></div>
+            </div>
+        </div>
+        <div class="position-tabs" id="position-tabs"></div>
+        <div class="player-grid" id="player-grid"></div>
+    </div>
+
+    <!-- SCR-002: Recording -->
+    <div id="screen-recording" class="screen">
+        <div class="header">
+            <div class="header-top">
+                <button class="header-back" id="btn-back-recording" aria-label="戻る">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    <span>戻る</span>
+                </button>
+                <div class="header-title">音声入力</div>
+                <div style="width:60px"></div>
+            </div>
+            <div class="header-player-info">
+                <div class="header-player-number" id="rec-player-number"></div>
+                <div>
+                    <div class="header-player-name" id="rec-player-name"></div>
+                    <div class="header-player-position" id="rec-player-position"></div>
+                </div>
+            </div>
+        </div>
+        <div class="recording-area">
+            <div class="recording-timer" id="recording-timer">00:00</div>
+            <div class="mic-container">
+                <button class="mic-btn" id="mic-btn" aria-label="録音開始">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                </button>
+                <div class="mic-pulse"></div>
+            </div>
+            <div class="mic-label" id="mic-label">タップして録音開始</div>
+        </div>
+        <div class="transcript-area">
+            <div class="transcript-box" id="transcript-box">
+                <span class="transcript-placeholder" id="transcript-placeholder">音声認識の結果がここに表示されます</span>
+                <span class="transcript-final" id="transcript-final"></span>
+                <span class="transcript-interim" id="transcript-interim"></span>
+            </div>
+        </div>
+        <div id="manual-input-area" style="display:none; padding: 0 16px; margin-top: 12px;">
+            <textarea class="manual-textarea" id="manual-textarea" placeholder="フィードバックを入力してください..." rows="6"></textarea>
+        </div>
+        <div style="padding: 8px 16px;">
+            <button class="input-mode-toggle" id="input-mode-toggle" style="display:none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 10H3M21 6H3M21 14H3M17 18H3"/></svg>
+                <span id="input-mode-label">テキスト入力に切替</span>
+            </button>
+        </div>
+        <div class="recording-actions">
+            <button class="btn btn-secondary btn-flex" id="btn-rec-reset">やり直し</button>
+            <button class="btn btn-primary btn-flex" id="btn-rec-proceed" disabled>AI要約へ進む</button>
+        </div>
+    </div>
+
+    <!-- SCR-003: Preview -->
+    <div id="screen-preview" class="screen">
+        <div class="header">
+            <div class="header-top">
+                <button class="header-back" id="btn-back-preview" aria-label="戻る">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    <span>戻る</span>
+                </button>
+                <div class="header-title">確認・編集</div>
+                <div style="width:60px"></div>
+            </div>
+            <div class="header-player-info">
+                <div class="header-player-number" id="prev-player-number"></div>
+                <div>
+                    <div class="header-player-name" id="prev-player-name"></div>
+                    <div class="header-player-position" id="prev-player-position"></div>
+                </div>
+            </div>
+        </div>
+        <div id="preview-loading" class="loading-container">
+            <div class="spinner"></div>
+            <div class="loading-text">AIが要約中...</div>
+        </div>
+        <div id="preview-body" style="display:none;">
+            <div class="preview-content">
+                <div class="preview-card preview-card-positive">
+                    <div class="preview-card-label">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        良かった点
+                    </div>
+                    <div class="preview-card-text" id="preview-positive" contenteditable="true" data-placeholder="良かった点を入力..."></div>
+                </div>
+                <div class="preview-card preview-card-improvement">
+                    <div class="preview-card-label">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                        改善点
+                    </div>
+                    <div class="preview-card-text" id="preview-improvement" contenteditable="true" data-placeholder="改善点を入力..."></div>
+                </div>
+                <div class="preview-card preview-card-action">
+                    <div class="preview-card-label">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        次のアクション
+                    </div>
+                    <div class="preview-card-text" id="preview-action" contenteditable="true" data-placeholder="次のアクションを入力..."></div>
+                </div>
+                <button class="raw-text-toggle" id="raw-text-toggle">
+                    <span>元のテキストを表示</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+                <div class="raw-text-content" id="raw-text-content">
+                    <div class="raw-text-inner" id="raw-text-inner"></div>
+                </div>
+            </div>
+            <div class="preview-actions">
+                <button class="btn btn-success btn-full" id="btn-send-slack">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    Slackに送信
+                </button>
+                <div class="preview-actions-row">
+                    <button class="btn btn-secondary btn-flex" id="btn-re-record">再録音</button>
+                    <button class="btn btn-secondary btn-flex" id="btn-cancel-preview">キャンセル</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCR-004: Completion -->
+    <div id="screen-complete" class="screen">
+        <div class="header">
+            <div class="header-top">
+                <div class="header-title">FB Studio</div>
+                <div class="header-coach" id="complete-coach-name"></div>
+            </div>
+        </div>
+        <div class="completion-container">
+            <div class="checkmark-circle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <div class="completion-title">送信完了！</div>
+            <div class="completion-subtitle" id="completion-subtitle"></div>
+            <button class="btn btn-primary mt-4" id="btn-next-feedback" style="min-width: 240px;">
+                次のフィードバックへ
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- SCR-005: History -->
+    <div id="screen-history" class="screen">
+        <div class="header">
+            <div class="header-top">
+                <div class="header-title">FB Studio</div>
+                <div class="header-coach" id="history-coach-name"></div>
+            </div>
+        </div>
+        <div class="history-filters">
+            <input type="text" class="filter-input" id="filter-player" placeholder="選手名">
+            <input type="text" class="filter-input" id="filter-coach" placeholder="コーチ名">
+            <input type="date" class="filter-input" id="filter-date-from" placeholder="開始日">
+            <input type="date" class="filter-input" id="filter-date-to" placeholder="終了日">
+        </div>
+        <div class="history-list" id="history-list">
+            <div class="history-empty" id="history-empty">履歴を読み込み中...</div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav" id="bottom-nav">
+        <button class="bottom-nav-item active" data-screen="home" aria-label="ホーム">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            ホーム
+        </button>
+        <button class="bottom-nav-item" data-screen="history" aria-label="履歴">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            履歴
+        </button>
+    </nav>
+
+    <!-- Coach Selection Modal -->
+    <div class="modal-overlay" id="coach-modal">
+        <div class="modal">
+            <div class="modal-title">コーチを選択</div>
+            <div class="modal-subtitle">あなたの名前を選んでください</div>
+            <div class="coach-list" id="coach-list">
+                <div class="loading-container" style="padding:20px;">
+                    <div class="spinner"></div>
+                    <div class="loading-text">読み込み中...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+/* ==========================================================================
+   FB Studio - Frontend SPA
+   京大サッカー部 AI Feedback System
+   ========================================================================== */
+
+// ============ Configuration ============
+// GAS WebアプリのデプロイURLをここに設定
+var GAS_URL = 'YOUR_GAS_DEPLOY_URL_HERE';
+
+const MAX_RECORDING_SECONDS = 300; // 5分
+const MAX_TEXT_LENGTH = 10000;
+const RETRY_DELAYS = [2000, 4000, 8000]; // ms
+
+// ============ State ============
+const state = {
+    currentScreen: 'home',
+    selectedPlayer: null,
+    coachName: '',
+    rawText: '',
+    summary: { positive: '', improvement: '', next_action: '' },
+    players: [],
+    coaches: [],
+    isRecording: false,
+    recordingTime: 0,
+    historyData: [],
+    positionFilter: 'ALL',
+    useManualInput: false,
+    isSending: false,
+};
+
+let recognition = null;
+let recordingInterval = null;
+let interimText = '';
+let finalText = '';
+let speechSupported = false;
+
+// ============ DOM Helpers ============
+function $(id) {
+    return document.getElementById(id);
+}
+
+function qs(selector) {
+    return document.querySelector(selector);
+}
+
+function qsa(selector) {
+    return document.querySelectorAll(selector);
+}
+
+function setTextSafe(el, text) {
+    if (el) el.textContent = text;
+}
+
+function createEl(tag, className, text) {
+    const el = document.createElement(tag);
+    if (className) el.className = className;
+    if (text) el.textContent = text;
+    return el;
+}
+
+// ============ Toast System ============
+function showToast(message, type = 'info', actionText = null, actionCallback = null, duration = 4000) {
+    const container = $('toast-container');
+    const toast = createEl('div', 'toast toast-' + type);
+    const msgSpan = createEl('span', null, message);
+    toast.appendChild(msgSpan);
+
+    if (actionText && actionCallback) {
+        const actionBtn = createEl('button', 'toast-action', actionText);
+        actionBtn.addEventListener('click', () => {
+            actionCallback();
+            removeToast(toast);
+        });
+        toast.appendChild(actionBtn);
+    }
+
+    container.appendChild(toast);
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            toast.classList.add('show');
+        });
+    });
+
+    const timeout = setTimeout(() => removeToast(toast), duration);
+    toast._timeout = timeout;
+}
+
+function removeToast(toast) {
+    clearTimeout(toast._timeout);
+    toast.classList.remove('show');
+    setTimeout(() => {
+        if (toast.parentNode) toast.parentNode.removeChild(toast);
+    }, 300);
+}
+
+// ============ API Layer (fetch) ============
+
+async function apiGet(action, params, retryCount) {
+    params = params || {};
+    retryCount = retryCount || 0;
+    try {
+        var url = GAS_URL + '?action=' + encodeURIComponent(action);
+        var keys = Object.keys(params);
+        for (var i = 0; i < keys.length; i++) {
+            var k = keys[i];
+            var v = params[k];
+            if (v !== undefined && v !== null && v !== '') {
+                url += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(v);
+            }
+        }
+        var res = await fetch(url, { redirect: 'follow' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return await res.json();
+    } catch (err) {
+        if (retryCount < RETRY_DELAYS.length) {
+            await sleep(RETRY_DELAYS[retryCount]);
+            return apiGet(action, params, retryCount + 1);
+        }
+        showToast('サーバーに接続できません', 'error');
+        throw err;
+    }
+}
+
+async function apiPost(data, retryCount) {
+    retryCount = retryCount || 0;
+    try {
+        var res = await fetch(GAS_URL, {
+            method: 'POST',
+            redirect: 'follow',
+            headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+            body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return await res.json();
+    } catch (err) {
+        if (retryCount < RETRY_DELAYS.length) {
+            await sleep(RETRY_DELAYS[retryCount]);
+            return apiPost(data, retryCount + 1);
+        }
+        throw err;
+    }
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// ============ Screen Navigation ============
+function navigateTo(screenName, direction) {
+    direction = direction || 'right';
+    var prevScreenId = 'screen-' + state.currentScreen;
+    var nextScreenId = 'screen-' + screenName;
+    var prevScreen = $(prevScreenId);
+    var nextScreen = $(nextScreenId);
+
+    if (!nextScreen) return;
+
+    // 前の画面を非表示
+    if (prevScreen && prevScreen !== nextScreen) {
+        prevScreen.classList.remove('visible');
+        setTimeout(function() {
+            prevScreen.classList.remove('active', 'slide-left');
+        }, 250);
+    }
+
+    state.currentScreen = screenName;
+
+    // 次の画面を表示
+    nextScreen.classList.add('active');
+    nextScreen.scrollTop = 0;
+    setTimeout(function() {
+        nextScreen.classList.add('visible');
+    }, 50);
+
+    // Update bottom nav visibility and active states
+    const bottomNav = $('bottom-nav');
+    const showNav = screenName === 'home' || screenName === 'history';
+    bottomNav.style.display = showNav ? 'flex' : 'none';
+
+    qsa('.bottom-nav-item').forEach(item => {
+        item.classList.toggle('active', item.dataset.screen === screenName);
+    });
+
+    // Adjust padding for screens without nav
+    nextScreen.style.paddingBottom = showNav
+        ? 'calc(80px + var(--safe-bottom))'
+        : 'calc(20px + var(--safe-bottom))';
+}
+
+// ============ SCR-001: Home Screen ============
+function renderPositionTabs() {
+    const tabs = $('position-tabs');
+    tabs.innerHTML = '';
+    const positions = ['ALL', 'GK', 'DF', 'MF', 'FW'];
+    const labels = { ALL: 'ALL', GK: 'GK', DF: 'DF', MF: 'MF', FW: 'FW' };
+
+    positions.forEach(pos => {
+        const tab = createEl('button', 'position-tab', labels[pos]);
+        if (pos === state.positionFilter) tab.classList.add('active');
+        tab.addEventListener('click', () => {
+            state.positionFilter = pos;
+            qsa('.position-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            renderPlayerGrid();
+        });
+        tabs.appendChild(tab);
+    });
+}
+
+function renderSkeletonGrid() {
+    const grid = $('player-grid');
+    grid.innerHTML = '';
+    for (let i = 0; i < 8; i++) {
+        const sk = createEl('div', 'skeleton skeleton-card');
+        grid.appendChild(sk);
+    }
+}
+
+function renderPlayerGrid() {
+    const grid = $('player-grid');
+    grid.innerHTML = '';
+    let players = state.players;
+
+    if (state.positionFilter !== 'ALL') {
+        players = players.filter(p => p.position === state.positionFilter);
+    }
+
+    if (players.length === 0) {
+        const empty = createEl('div', 'history-empty', '選手が見つかりません');
+        empty.style.gridColumn = '1 / -1';
+        grid.appendChild(empty);
+        return;
+    }
+
+    players.forEach(player => {
+        const card = createEl('div', 'player-card');
+        card.setAttribute('role', 'button');
+        card.setAttribute('tabindex', '0');
+
+        const num = createEl('div', 'player-number', String(player.number));
+        const info = createEl('div');
+        const name = createEl('div', 'player-name', player.name);
+        const pos = createEl('div', 'player-pos-badge', player.position);
+        info.appendChild(name);
+        info.appendChild(pos);
+        card.appendChild(num);
+        card.appendChild(info);
+
+        card.addEventListener('click', () => selectPlayer(player));
+        card.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                selectPlayer(player);
+            }
+        });
+
+        grid.appendChild(card);
+    });
+}
+
+function selectPlayer(player) {
+    state.selectedPlayer = player;
+    state.rawText = '';
+    state.summary = { positive: '', improvement: '', next_action: '' };
+    finalText = '';
+    interimText = '';
+    state.recordingTime = 0;
+    state.isRecording = false;
+
+    // Update recording screen player info
+    setTextSafe($('rec-player-number'), '#' + player.number);
+    setTextSafe($('rec-player-name'), player.name);
+    setTextSafe($('rec-player-position'), player.position);
+
+    navigateTo('recording');
+    resetRecordingUI();
+}
+
+// ============ SCR-002: Recording Screen ============
+function initSpeechRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        speechSupported = false;
+        return;
+    }
+    speechSupported = true;
+
+    recognition = new SpeechRecognition();
+    recognition.lang = 'ja-JP';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onresult = (event) => {
+        let interim = '';
+        let final = '';
+        for (let i = 0; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+                final += transcript;
+            } else {
+                interim += transcript;
+            }
+        }
+        // Append new final text to existing
+        if (final && final !== finalText) {
+            finalText = final;
+        }
+        interimText = interim;
+        updateTranscriptDisplay();
+        updateProceedButton();
+    };
+
+    recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        if (event.error === 'not-allowed') {
+            showToast('マイクが使用できません。テキスト入力に切り替えます。', 'warning', null, null, 4000);
+            stopRecording();
+            switchToManualInput();
+        } else if (event.error === 'no-speech') {
+            // Silently restart if still recording
+            if (state.isRecording) {
+                try { recognition.start(); } catch(e) { /* ignore */ }
+            }
+        } else if (event.error === 'network') {
+            showToast('音声を認識できませんでした', 'error', 'テキスト入力', () => {
+                switchToManualInput();
+            });
+            stopRecording();
+        } else {
+            showToast('音声を認識できませんでした', 'error', '再試行', () => {
+                startRecording();
+            });
+            stopRecording();
+        }
+    };
+
+    recognition.onend = () => {
+        // Auto-restart if still recording (Chrome stops after silence)
+        if (state.isRecording) {
+            try {
+                recognition.start();
+            } catch (e) {
+                // If restart fails, stop recording gracefully
+                stopRecording();
+            }
+        }
+    };
+}
+
+function resetRecordingUI() {
+    finalText = '';
+    interimText = '';
+    state.recordingTime = 0;
+    state.isRecording = false;
+    state.useManualInput = false;
+
+    setTextSafe($('recording-timer'), '00:00');
+    $('recording-timer').classList.remove('active');
+    $('mic-btn').classList.remove('recording');
+    setTextSafe($('mic-label'), 'タップして録音開始');
+    $('transcript-final').textContent = '';
+    $('transcript-interim').textContent = '';
+    $('transcript-placeholder').style.display = '';
+    $('btn-rec-proceed').disabled = true;
+    $('manual-input-area').style.display = 'none';
+    $('manual-textarea').value = '';
+
+    if (!speechSupported) {
+        switchToManualInput();
+        showToast('音声入力に非対応です。テキスト入力をご利用ください。', 'warning', null, null, 3000);
+    } else {
+        $('input-mode-toggle').style.display = 'flex';
+        setTextSafe($('input-mode-label'), 'テキスト入力に切替');
+    }
+
+    if (recordingInterval) {
+        clearInterval(recordingInterval);
+        recordingInterval = null;
+    }
+}
+
+function startRecording() {
+    if (!speechSupported || !recognition) {
+        showToast('音声入力に非対応のため、テキスト入力をご利用ください。', 'warning', null, null, 4000);
+        switchToManualInput();
+        return;
+    }
+
+    state.isRecording = true;
+    state.recordingTime = 0;
+    $('mic-btn').classList.add('recording');
+    setTextSafe($('mic-label'), '録音中...タップで停止');
+    $('recording-timer').classList.add('active');
+    $('transcript-placeholder').style.display = 'none';
+
+    try {
+        recognition.start();
+    } catch (e) {
+        // 開始に失敗 → テキスト入力にフォールバック
+        showToast('音声認識を開始できません。テキスト入力に切り替えます。', 'warning', null, null, 4000);
+        stopRecording();
+        switchToManualInput();
+        return;
+    }
+
+    // 2秒以内にonerrorが来たら失敗とみなすタイマー
+    var micCheckTimeout = setTimeout(function() {
+        // 正常に録音開始済み - 何もしない
+    }, 2000);
+
+    recordingInterval = setInterval(function() {
+        state.recordingTime++;
+        updateTimerDisplay();
+        if (state.recordingTime >= MAX_RECORDING_SECONDS) {
+            showToast('録音時間の上限（5分）に達しました', 'warning');
+            stopRecording();
+        }
+    }, 1000);
+}
+
+function stopRecording() {
+    state.isRecording = false;
+    $('mic-btn').classList.remove('recording');
+    setTextSafe($('mic-label'), 'タップして録音開始');
+    $('recording-timer').classList.remove('active');
+
+    if (recordingInterval) {
+        clearInterval(recordingInterval);
+        recordingInterval = null;
+    }
+
+    try {
+        if (recognition) recognition.stop();
+    } catch (e) { /* ignore */ }
+
+    // Commit any remaining interim text
+    if (interimText) {
+        finalText += interimText;
+        interimText = '';
+        updateTranscriptDisplay();
+    }
+    updateProceedButton();
+}
+
+function updateTimerDisplay() {
+    const min = String(Math.floor(state.recordingTime / 60)).padStart(2, '0');
+    const sec = String(state.recordingTime % 60).padStart(2, '0');
+    setTextSafe($('recording-timer'), min + ':' + sec);
+}
+
+function updateTranscriptDisplay() {
+    const finalEl = $('transcript-final');
+    const interimEl = $('transcript-interim');
+    finalEl.textContent = finalText;
+    interimEl.textContent = interimText;
+}
+
+function updateProceedButton() {
+    const hasText = state.useManualInput
+        ? $('manual-textarea').value.trim().length > 0
+        : (finalText.trim().length > 0 || interimText.trim().length > 0);
+    $('btn-rec-proceed').disabled = !hasText;
+}
+
+function switchToManualInput() {
+    state.useManualInput = true;
+    stopRecording();
+    $('mic-btn').style.display = 'none';
+    qs('.mic-pulse').style.display = 'none';
+    $('recording-timer').style.display = 'none';
+    setTextSafe($('mic-label'), '');
+    $('transcript-box').style.display = 'none';
+    $('manual-input-area').style.display = 'block';
+    $('input-mode-toggle').style.display = speechSupported ? 'flex' : 'none';
+    setTextSafe($('input-mode-label'), '音声入力に切替');
+
+    // Pre-fill manual textarea with any existing speech text
+    if (finalText.trim()) {
+        $('manual-textarea').value = finalText;
+    }
+}
+
+function switchToVoiceInput() {
+    state.useManualInput = false;
+    $('mic-btn').style.display = 'flex';
+    qs('.mic-pulse').style.display = '';
+    $('recording-timer').style.display = '';
+    $('transcript-box').style.display = '';
+    $('manual-input-area').style.display = 'none';
+    $('input-mode-toggle').style.display = 'flex';
+    setTextSafe($('input-mode-label'), 'テキスト入力に切替');
+    setTextSafe($('mic-label'), 'タップして録音開始');
+
+    // Preserve manual text
+    const manualVal = $('manual-textarea').value.trim();
+    if (manualVal && !finalText.trim()) {
+        finalText = manualVal;
+        updateTranscriptDisplay();
+    }
+}
+
+function getCurrentText() {
+    if (state.useManualInput) {
+        return $('manual-textarea').value.trim();
+    }
+    return (finalText + interimText).trim();
+}
+
+// ============ SCR-003: Preview Screen ============
+async function proceedToPreview() {
+    let text = getCurrentText();
+
+    if (!text) {
+        showToast('テキストが入力されていません', 'warning');
+        return;
+    }
+
+    if (text.length > MAX_TEXT_LENGTH) {
+        text = text.substring(0, MAX_TEXT_LENGTH);
+        showToast('テキストが長すぎます。10,000文字に短縮しました。', 'warning');
+    }
+
+    state.rawText = text;
+
+    // Stop recording if active
+    stopRecording();
+
+    // Update preview player info
+    const player = state.selectedPlayer;
+    setTextSafe($('prev-player-number'), '#' + player.number);
+    setTextSafe($('prev-player-name'), player.name);
+    setTextSafe($('prev-player-position'), player.position);
+
+    navigateTo('preview');
+
+    // Show loading, hide body
+    $('preview-loading').style.display = 'flex';
+    $('preview-body').style.display = 'none';
+
+    try {
+        const result = await apiPost({
+            action: 'summarize',
+            raw_text: state.rawText,
+            player_name: player.name,
+        });
+
+        if (result && result.success) {
+            const s = result.summary || {};
+            state.summary = {
+                positive: s.positive || '',
+                improvement: s.improvement || '',
+                next_action: s.next_action || '',
+            };
+        } else {
+            throw new Error((result && result.error) || 'AI summary failed');
+        }
+    } catch (err) {
+        console.error('Summarize error:', err);
+        showToast('AI要約に失敗しました。手動で編集してください。', 'error', null, null, 5000);
+        state.summary = { positive: '', improvement: '', next_action: '' };
+    }
+
+    // Populate preview cards
+    $('preview-positive').textContent = state.summary.positive;
+    $('preview-improvement').textContent = state.summary.improvement;
+    $('preview-action').textContent = state.summary.next_action;
+    $('raw-text-inner').textContent = state.rawText;
+
+    // Hide loading, show body
+    $('preview-loading').style.display = 'none';
+    $('preview-body').style.display = '';
+
+    updateSendButton();
+}
+
+function updateSendButton() {
+    const pos = ($('preview-positive').textContent || '').trim();
+    const imp = ($('preview-improvement').textContent || '').trim();
+    const act = ($('preview-action').textContent || '').trim();
+    const allEmpty = !pos && !imp && !act;
+    $('btn-send-slack').disabled = allEmpty || state.isSending;
+}
+
+// ============ SCR-004: Completion ============
+async function sendToSlack() {
+    if (state.isSending) return;
+    state.isSending = true;
+    $('btn-send-slack').disabled = true;
+    setTextSafe($('btn-send-slack').querySelector('span') || $('btn-send-slack'), 'Slackに送信');
+
+    // Read current (possibly edited) values
+    const positive = ($('preview-positive').textContent || '').trim();
+    const improvement = ($('preview-improvement').textContent || '').trim();
+    const nextAction = ($('preview-action').textContent || '').trim();
+
+    if (!positive && !improvement && !nextAction) {
+        showToast('すべてのセクションが空です', 'warning');
+        state.isSending = false;
+        $('btn-send-slack').disabled = false;
+        return;
+    }
+
+    const player = state.selectedPlayer;
+    const payload = {
+        action: 'submitFeedback',
+        player_id: player.id,
+        coach_name: state.coachName,
+        raw_text: state.rawText,
+        positive: positive,
+        improvement: improvement,
+        next_action: nextAction,
+    };
+
+    try {
+        const result = await apiPost(payload);
+
+        if (result && result.success) {
+            // Show completion screen
+            setTextSafe($('completion-subtitle'), '#' + player.number + ' ' + player.name + ' へのフィードバックを送信しました');
+            setTextSafe($('complete-coach-name'), state.coachName);
+            navigateTo('complete');
+
+            // Check if Slack send failed (data still saved to Sheets)
+            if (result.slack_ts === null) {
+                showToast('Slackへの送信に失敗しましたが、Sheetsには保存済みです', 'warning', null, null, 6000);
+            }
+        } else {
+            throw new Error((result && result.error) || 'Send failed');
+        }
+    } catch (err) {
+        console.error('Send error:', err);
+
+        // Try to save locally
+        try {
+            const localBackup = JSON.parse(localStorage.getItem('fb_backup') || '[]');
+            localBackup.push(payload);
+            localStorage.setItem('fb_backup', JSON.stringify(localBackup));
+            showToast('保存に失敗しました。データはローカルに一時保存されました。', 'error', '再試行', () => sendToSlack(), 6000);
+        } catch (localErr) {
+            showToast('保存に失敗しました', 'error', '再試行', () => sendToSlack());
+        }
+    } finally {
+        state.isSending = false;
+        $('btn-send-slack').disabled = false;
+    }
+}
+
+// ============ SCR-005: History Screen ============
+async function loadHistory() {
+    const listEl = $('history-list');
+    listEl.innerHTML = '';
+    const emptyEl = createEl('div', 'history-empty', '履歴を読み込み中...');
+    listEl.appendChild(emptyEl);
+
+    try {
+        const result = await apiGet('getHistory');
+        const data = result.data || result.history || result || [];
+        state.historyData = Array.isArray(data) ? data : [];
+        renderHistory();
+    } catch (err) {
+        console.error('History error:', err);
+        setTextSafe(emptyEl, '履歴の読み込みに失敗しました');
+    }
+}
+
+function renderHistory() {
+    const listEl = $('history-list');
+    listEl.innerHTML = '';
+
+    var items = state.historyData.slice();
+
+    // Apply filters
+    const filterPlayer = $('filter-player').value.trim().toLowerCase();
+    const filterCoach = $('filter-coach').value.trim().toLowerCase();
+    const filterDateFrom = $('filter-date-from').value;
+    const filterDateTo = $('filter-date-to').value;
+
+    if (filterPlayer) {
+        items = items.filter(i => (i.player_name || '').toLowerCase().includes(filterPlayer));
+    }
+    if (filterCoach) {
+        items = items.filter(i => (i.coach || '').toLowerCase().includes(filterCoach));
+    }
+    if (filterDateFrom) {
+        items = items.filter(i => {
+            const d = (i.date || '').substring(0, 10).replace(/\//g, '-');
+            return d >= filterDateFrom;
+        });
+    }
+    if (filterDateTo) {
+        items = items.filter(i => {
+            const d = (i.date || '').substring(0, 10).replace(/\//g, '-');
+            return d <= filterDateTo;
+        });
+    }
+
+    // Sort by date descending
+    items.sort((a, b) => {
+        const da = a.date || '';
+        const db = b.date || '';
+        return db.localeCompare(da);
+    });
+
+    if (items.length === 0) {
+        listEl.appendChild(createEl('div', 'history-empty', '履歴がありません'));
+        return;
+    }
+
+    items.forEach(item => {
+        const card = createEl('div', 'history-card');
+
+        const header = createEl('div', 'history-card-header');
+        const left = createEl('div', 'history-card-left');
+
+        const playerName = item.player_name || '不明';
+        const playerNum = '';
+        const coachName = item.coach || '';
+        const date = item.date || '';
+
+        const playerEl = createEl('div', 'history-card-player',
+            (playerNum ? '#' + playerNum + ' ' : '') + playerName);
+        const metaEl = createEl('div', 'history-card-meta', coachName + ' / ' + date);
+        left.appendChild(playerEl);
+        left.appendChild(metaEl);
+
+        const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        arrow.setAttribute('class', 'history-card-arrow');
+        arrow.setAttribute('viewBox', '0 0 24 24');
+        arrow.setAttribute('fill', 'none');
+        arrow.setAttribute('stroke', 'currentColor');
+        arrow.setAttribute('stroke-width', '2.5');
+        arrow.setAttribute('stroke-linecap', 'round');
+        arrow.setAttribute('stroke-linejoin', 'round');
+        const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+        polyline.setAttribute('points', '6 9 12 15 18 9');
+        arrow.appendChild(polyline);
+
+        header.appendChild(left);
+        header.appendChild(arrow);
+
+        const body = createEl('div', 'history-card-body');
+
+        const positive = item.positive || '';
+        const improvement = item.improvement || '';
+        const nextAction = item.next_action || '';
+
+        if (positive) {
+            const sec = createEl('div', 'history-card-section history-section-positive');
+            sec.appendChild(createEl('div', 'history-card-section-label', '良かった点'));
+            sec.appendChild(createEl('div', 'history-card-section-text', positive));
+            body.appendChild(sec);
+        }
+        if (improvement) {
+            const sec = createEl('div', 'history-card-section history-section-improvement');
+            sec.appendChild(createEl('div', 'history-card-section-label', '改善点'));
+            sec.appendChild(createEl('div', 'history-card-section-text', improvement));
+            body.appendChild(sec);
+        }
+        if (nextAction) {
+            const sec = createEl('div', 'history-card-section history-section-action');
+            sec.appendChild(createEl('div', 'history-card-section-label', '次のアクション'));
+            sec.appendChild(createEl('div', 'history-card-section-text', nextAction));
+            body.appendChild(sec);
+        }
+
+        if (!positive && !improvement && !nextAction) {
+            const sec = createEl('div', 'history-card-section');
+            sec.appendChild(createEl('div', 'history-card-section-text', '内容なし'));
+            body.appendChild(sec);
+        }
+
+        header.addEventListener('click', () => {
+            card.classList.toggle('open');
+        });
+
+        card.appendChild(header);
+        card.appendChild(body);
+        listEl.appendChild(card);
+    });
+}
+
+function formatDate(dateStr) {
+    if (!dateStr) return '';
+    try {
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return dateStr;
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const h = String(d.getHours()).padStart(2, '0');
+        const min = String(d.getMinutes()).padStart(2, '0');
+        return y + '/' + m + '/' + day + ' ' + h + ':' + min;
+    } catch(e) {
+        return dateStr;
+    }
+}
+
+// ============ Coach Modal ============
+async function showCoachModal() {
+    // Check sessionStorage first
+    const saved = sessionStorage.getItem('fb_coach');
+    if (saved) {
+        state.coachName = saved;
+        updateCoachDisplay();
+        return;
+    }
+
+    const modal = $('coach-modal');
+    modal.classList.add('show');
+
+    try {
+        const result = await apiGet('getCoaches');
+        const coaches = result.data || result.coaches || result || [];
+        state.coaches = Array.isArray(coaches) ? coaches : [];
+        renderCoachList();
+    } catch (err) {
+        console.error('Get coaches error:', err);
+        // Show manual input fallback
+        renderCoachListFallback();
+    }
+}
+
+function renderCoachList() {
+    const list = $('coach-list');
+    list.innerHTML = '';
+
+    if (state.coaches.length === 0) {
+        renderCoachListFallback();
+        return;
+    }
+
+    state.coaches.forEach(coach => {
+        const name = typeof coach === 'string' ? coach : (coach.display_name || coach.name || '');
+        if (!name) return;
+        const item = createEl('button', 'coach-item', name);
+        item.addEventListener('click', () => {
+            state.coachName = name;
+            sessionStorage.setItem('fb_coach', name);
+            $('coach-modal').classList.remove('show');
+            updateCoachDisplay();
+        });
+        list.appendChild(item);
+    });
+}
+
+function renderCoachListFallback() {
+    const list = $('coach-list');
+    list.innerHTML = '';
+
+    const label = createEl('div', 'modal-subtitle', '名前を入力してください');
+    label.style.textAlign = 'left';
+    label.style.marginBottom = '8px';
+    list.appendChild(label);
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'filter-input';
+    input.style.width = '100%';
+    input.style.marginBottom = '12px';
+    input.placeholder = 'コーチ名を入力';
+    list.appendChild(input);
+
+    const btn = createEl('button', 'btn btn-primary btn-full', '決定');
+    btn.addEventListener('click', () => {
+        const name = input.value.trim();
+        if (!name) {
+            showToast('名前を入力してください', 'warning');
+            return;
+        }
+        state.coachName = name;
+        sessionStorage.setItem('fb_coach', name);
+        $('coach-modal').classList.remove('show');
+        updateCoachDisplay();
+    });
+    list.appendChild(btn);
+
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') btn.click();
+    });
+}
+
+function updateCoachDisplay() {
+    setTextSafe($('header-coach-name'), state.coachName);
+    setTextSafe($('history-coach-name'), state.coachName);
+    setTextSafe($('complete-coach-name'), state.coachName);
+}
+
+// ============ Load Players ============
+async function loadPlayers() {
+    // Check sessionStorage cache
+    const cached = sessionStorage.getItem('fb_players');
+    if (cached) {
+        try {
+            state.players = JSON.parse(cached);
+            renderPositionTabs();
+            renderPlayerGrid();
+            return;
+        } catch (e) { /* fall through */ }
+    }
+
+    renderPositionTabs();
+    renderSkeletonGrid();
+
+    try {
+        const result = await apiGet('getPlayers');
+        const players = result.data || result.players || result || [];
+        state.players = Array.isArray(players) ? players : [];
+
+        // Sort by number
+        state.players.sort((a, b) => (a.number || 0) - (b.number || 0));
+
+        // Cache
+        sessionStorage.setItem('fb_players', JSON.stringify(state.players));
+        renderPlayerGrid();
+    } catch (err) {
+        console.error('Get players error:', err);
+        const grid = $('player-grid');
+        grid.innerHTML = '';
+        const empty = createEl('div', 'history-empty', '選手データの読み込みに失敗しました');
+        empty.style.gridColumn = '1 / -1';
+        grid.appendChild(empty);
+    }
+}
+
+// ============ Raw Text Toggle ============
+function initRawTextToggle() {
+    const toggle = $('raw-text-toggle');
+    const content = $('raw-text-content');
+
+    toggle.addEventListener('click', () => {
+        const isOpen = content.classList.contains('open');
+        content.classList.toggle('open');
+        toggle.classList.toggle('open');
+        setTextSafe(toggle.querySelector('span'), isOpen ? '元のテキストを表示' : '元のテキストを隠す');
+    });
+}
+
+// ============ Local Backup Retry ============
+async function retryLocalBackups() {
+    try {
+        const backups = JSON.parse(localStorage.getItem('fb_backup') || '[]');
+        if (backups.length === 0) return;
+
+        const remaining = [];
+        for (const payload of backups) {
+            try {
+                await apiPost(payload);
+            } catch(e) {
+                remaining.push(payload);
+            }
+        }
+
+        if (remaining.length > 0) {
+            localStorage.setItem('fb_backup', JSON.stringify(remaining));
+        } else {
+            localStorage.removeItem('fb_backup');
+            if (remaining.length < backups.length) {
+                showToast('ローカルに保存されていたデータを送信しました', 'success');
+            }
+        }
+    } catch(e) { /* ignore */ }
+}
+
+// ============ Event Bindings ============
+function bindEvents() {
+    // Bottom navigation
+    qsa('.bottom-nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const screen = item.dataset.screen;
+            if (screen === state.currentScreen) return;
+            navigateTo(screen, screen === 'history' ? 'right' : 'left');
+            if (screen === 'history') {
+                loadHistory();
+            }
+        });
+    });
+
+    // Recording screen
+    $('mic-btn').addEventListener('click', () => {
+        if (state.useManualInput) return;
+        if (state.isRecording) {
+            stopRecording();
+        } else {
+            startRecording();
+        }
+    });
+
+    $('btn-back-recording').addEventListener('click', () => {
+        stopRecording();
+        navigateTo('home', 'left');
+    });
+
+    $('btn-rec-reset').addEventListener('click', () => {
+        stopRecording();
+        resetRecordingUI();
+    });
+
+    $('btn-rec-proceed').addEventListener('click', () => {
+        proceedToPreview();
+    });
+
+    $('input-mode-toggle').addEventListener('click', () => {
+        if (state.useManualInput) {
+            switchToVoiceInput();
+        } else {
+            switchToManualInput();
+        }
+    });
+
+    $('manual-textarea').addEventListener('input', () => {
+        updateProceedButton();
+    });
+
+    // Preview screen
+    $('btn-back-preview').addEventListener('click', () => {
+        navigateTo('recording', 'left');
+    });
+
+    $('btn-send-slack').addEventListener('click', () => {
+        sendToSlack();
+    });
+
+    $('btn-re-record').addEventListener('click', () => {
+        navigateTo('recording', 'left');
+        resetRecordingUI();
+    });
+
+    $('btn-cancel-preview').addEventListener('click', () => {
+        navigateTo('home', 'left');
+    });
+
+    // Preview card editing - update send button on input
+    ['preview-positive', 'preview-improvement', 'preview-action'].forEach(id => {
+        $(id).addEventListener('input', () => {
+            updateSendButton();
+        });
+        // Prevent pasting HTML
+        $(id).addEventListener('paste', (e) => {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+            document.execCommand('insertText', false, text);
+        });
+    });
+
+    // Raw text toggle
+    initRawTextToggle();
+
+    // Completion screen
+    $('btn-next-feedback').addEventListener('click', () => {
+        navigateTo('home', 'left');
+    });
+
+    // History filters
+    ['filter-player', 'filter-coach', 'filter-date-from', 'filter-date-to'].forEach(id => {
+        $(id).addEventListener('input', () => {
+            renderHistory();
+        });
+        $(id).addEventListener('change', () => {
+            renderHistory();
+        });
+    });
+}
+
+// ============ Initialization ============
+async function init() {
+    try {
+        initSpeechRecognition();
+        bindEvents();
+    } catch(e) {
+        console.error('Init bind error:', e);
+    }
+
+    // コーチモーダル表示（失敗してもスキップ）
+    try {
+        await showCoachModal();
+    } catch(e) {
+        console.error('Coach modal error:', e);
+    }
+
+    // 選手データ読み込み（失敗してもスキップ）
+    try {
+        await loadPlayers();
+    } catch(e) {
+        console.error('Load players error:', e);
+    }
+
+    // ローカルバックアップの再送信
+    try {
+        retryLocalBackups();
+    } catch(e) {
+        console.error('Backup retry error:', e);
+    }
+}
+
+// Start - DOMContentLoadedとloadの両方で対応
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
+</script>
+</body>
+</html>
