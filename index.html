@@ -1352,6 +1352,7 @@ let recordingInterval = null;
 let interimText = '';
 let finalText = '';
 let speechSupported = false;
+let networkRetryCount = 0;
 
 // ============ DOM Helpers ============
 function $(id) {
@@ -1641,10 +1642,20 @@ function initSpeechRecognition() {
                 try { recognition.start(); } catch(e) { /* ignore */ }
             }
         } else if (event.error === 'network') {
-            showToast('音声を認識できませんでした', 'error', 'テキスト入力', () => {
-                switchToManualInput();
-            });
-            stopRecording();
+            if (networkRetryCount < 2 && state.isRecording) {
+                networkRetryCount++;
+                setTimeout(() => {
+                    if (state.isRecording) {
+                        try { recognition.start(); } catch(e) { /* ignore */ }
+                    }
+                }, 1000);
+            } else {
+                networkRetryCount = 0;
+                showToast('音声認識に接続できません', 'error', 'テキスト入力', () => {
+                    switchToManualInput();
+                });
+                stopRecording();
+            }
         } else {
             showToast('音声を認識できませんでした', 'error', '再試行', () => {
                 startRecording();
@@ -1707,6 +1718,7 @@ function startRecording() {
 
     state.isRecording = true;
     state.recordingTime = 0;
+    networkRetryCount = 0;
     $('mic-btn').classList.add('recording');
     setTextSafe($('mic-label'), '録音中...タップで停止');
     $('recording-timer').classList.add('active');
